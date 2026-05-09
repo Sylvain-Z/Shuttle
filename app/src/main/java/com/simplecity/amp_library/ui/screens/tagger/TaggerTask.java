@@ -3,6 +3,7 @@ package com.simplecity.amp_library.ui.screens.tagger;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.os.ParcelFileDescriptor;
+import android.util.Log;
 import android.support.v4.provider.DocumentFile;
 import com.simplecity.amp_library.model.TagUpdate;
 import io.reactivex.annotations.NonNull;
@@ -21,6 +22,8 @@ import org.jaudiotagger.tag.Tag;
 import org.jaudiotagger.tag.TagException;
 
 public class TaggerTask extends AsyncTask<Object, Integer, Boolean> {
+
+    private static final String TAG = "TaggerTask";
 
     public interface TagCompletionListener {
         void onSuccess();
@@ -100,7 +103,7 @@ public class TaggerTask extends AsyncTask<Object, Integer, Boolean> {
                 AudioFile audioFile = AudioFileIO.read(orig);
                 Tag tag = audioFile.getTag();
                 if (tag == null) {
-                    break;
+                    continue;
                 }
 
                 TagUpdate tagUpdate = new TagUpdate(tag);
@@ -134,26 +137,25 @@ public class TaggerTask extends AsyncTask<Object, Integer, Boolean> {
 
                         audioFile = AudioFileIO.read(temp);
                         tag = audioFile.getTag();
-                        if (tag == null) {
-                            break;
-                        }
                     }
 
-                    tagUpdate.updateTag(tag);
-                    AudioFileIO.write(audioFile);
+                    if (tag != null) {
+                        tagUpdate.updateTag(tag);
+                        AudioFileIO.write(audioFile);
 
-                    if (requiresPermission && temp != null) {
-                        DocumentFile documentFile = documentFiles.get(i);
-                        if (documentFile != null) {
-                            ParcelFileDescriptor pfd = applicationContext.getContentResolver().openFileDescriptor(documentFile.getUri(), "w");
-                            if (pfd != null) {
-                                FileOutputStream fileOutputStream = new FileOutputStream(pfd.getFileDescriptor());
-                                TaggerUtils.copyFile(temp, fileOutputStream);
-                                pfd.close();
-                            }
-                            if (temp.delete()) {
-                                if (tempFiles.contains(temp)) {
-                                    tempFiles.remove(temp);
+                        if (requiresPermission && temp != null) {
+                            DocumentFile documentFile = documentFiles.get(i);
+                            if (documentFile != null) {
+                                ParcelFileDescriptor pfd = applicationContext.getContentResolver().openFileDescriptor(documentFile.getUri(), "w");
+                                if (pfd != null) {
+                                    FileOutputStream fileOutputStream = new FileOutputStream(pfd.getFileDescriptor());
+                                    TaggerUtils.copyFile(temp, fileOutputStream);
+                                    pfd.close();
+                                }
+                                if (temp.delete()) {
+                                    if (tempFiles.contains(temp)) {
+                                        tempFiles.remove(temp);
+                                    }
                                 }
                             }
                         }
@@ -169,7 +171,9 @@ public class TaggerTask extends AsyncTask<Object, Integer, Boolean> {
                 if (tempFiles != null && tempFiles.size() != 0) {
                     for (int j = tempFiles.size() - 1; j >= 0; j--) {
                         File file = tempFiles.get(j);
-                        file.delete();
+                        if (!file.delete()) {
+                            Log.w(TAG, "Failed to delete temp file: " + file.getPath());
+                        }
                         tempFiles.remove(j);
                     }
                 }

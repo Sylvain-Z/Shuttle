@@ -20,7 +20,7 @@ import com.simplecity.amp_library.utils.sorting.SortManager;
 import java.util.Arrays;
 import java.util.List;
 
-public class AlbumArtistView extends MultiItemView<AlbumArtistView.ViewHolder, AlbumArtist> implements
+public class AlbumArtistView extends MultiItemView<AlbumArtistView.ViewHolder> implements
         SectionedView {
 
     public interface ClickListener {
@@ -172,7 +172,7 @@ public class AlbumArtistView extends MultiItemView<AlbumArtistView.ViewHolder, A
                 break;
         }
 
-        if (!TextUtils.isEmpty(string)) {
+        if (string != null && !string.isEmpty()) {
             string = string.substring(0, 1).toUpperCase();
         } else {
             string = " ";

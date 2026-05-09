@@ -87,7 +87,7 @@ final class MaterialDialogsUtil {
       fieldLinkColor.set(instance, ColorStateList.valueOf(params.accentColor));
 
     } catch (Throwable t) {
-//      t.printStackTrace();
+      // Ignored: reflection failure is non-critical
     }
   }
 

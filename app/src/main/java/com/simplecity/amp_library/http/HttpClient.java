@@ -12,25 +12,23 @@ public class HttpClient {
     private static final String URL_LAST_FM = "https://ws.audioscrobbler.com/2.0/";
     private static final String URL_ITUNES = "https://itunes.apple.com/search/";
 
-    private static HttpClient sInstance;
-
     public OkHttpClient okHttpClient;
 
     public LastFmService lastFmService;
 
     public static final String TAG_ARTWORK = "artwork";
 
-    public static synchronized HttpClient getInstance() {
-        if (sInstance == null) {
-            sInstance = new HttpClient();
-        }
-        return sInstance;
+    private static final class Holder {
+        private static final HttpClient INSTANCE = new HttpClient();
+    }
+
+    public static HttpClient getInstance() {
+        return Holder.INSTANCE;
     }
 
     private HttpClient() {
 
         okHttpClient = new OkHttpClient.Builder()
-                //                .proxy(new Proxy(Proxy.Type.HTTP, new InetSocketAddress("192.168.0.3", 8888)))
                 .build();
 
         Retrofit lastFmRestAdapter = new Retrofit.Builder()

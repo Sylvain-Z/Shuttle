@@ -54,6 +54,7 @@ public class DeleteDialog extends DialogFragment implements SafManager.SafDialog
     }
 
     private static final String TAG = "DeleteDialog";
+    private static final String MSG_FAILED_TO_DELETE_SONGS = MSG_FAILED_TO_DELETE_SONGS;
 
     private static final String ARG_TYPE = "type";
     private static final String ARG_DELETE_MESSAGE_ID = "delete_message_id";
@@ -289,13 +290,13 @@ public class DeleteDialog extends DialogFragment implements SafManager.SafDialog
                                         dismiss();
                                     }
                                 }, error -> {
-                                    LogUtils.logException(TAG, "Failed to delete songs", error);
+                                    LogUtils.logException(TAG, MSG_FAILED_TO_DELETE_SONGS, error);
                                     if (DeleteDialog.this.isAdded()) {
                                         Toast.makeText(getContext(), getString(R.string.delete_songs_failure_toast), Toast.LENGTH_SHORT).show();
                                     }
                                 }));
                     }
-                }, error -> LogUtils.logException(TAG, "Failed to delete songs", error)));
+                }, error -> LogUtils.logException(TAG, MSG_FAILED_TO_DELETE_SONGS, error)));
     }
 
     @SuppressLint("CheckResult")
@@ -361,7 +362,7 @@ public class DeleteDialog extends DialogFragment implements SafManager.SafDialog
                             Toast.makeText(getContext(), getString(R.string.delete_songs_failure_toast), Toast.LENGTH_SHORT).show();
                         }
                         dismiss();
-                    }, error -> LogUtils.logException(TAG, "Failed to delete songs", error)));
+                    }, error -> LogUtils.logException(TAG, MSG_FAILED_TO_DELETE_SONGS, error)));
         } else {
             Toast.makeText(getContext(), R.string.delete_songs_failure_toast, Toast.LENGTH_LONG).show();
             dismiss();

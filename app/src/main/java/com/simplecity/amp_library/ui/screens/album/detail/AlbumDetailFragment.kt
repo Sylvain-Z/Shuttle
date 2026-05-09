@@ -417,7 +417,7 @@ class AlbumDetailFragment :
         }
 
         override fun onStartDrag(holder: SongView.ViewHolder) {
-
+            // Drag-to-reorder is not supported in album detail view
         }
     }
 

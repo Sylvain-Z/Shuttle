@@ -10,10 +10,6 @@ import java.io.InputStream;
 
 public class CustomGlideModule implements GlideModule {
 
-    public CustomGlideModule() {
-
-    }
-
     @Override
     public void applyOptions(Context context, GlideBuilder builder) {
 

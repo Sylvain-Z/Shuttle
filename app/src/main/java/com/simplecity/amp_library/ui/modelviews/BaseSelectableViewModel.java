@@ -5,7 +5,7 @@ import com.simplecityapps.recycler_adapter.model.BaseViewModel;
 import com.simplecityapps.recycler_adapter.recyclerview.BaseViewHolder;
 import java.util.List;
 
-public abstract class BaseSelectableViewModel<VH extends BaseViewHolder> extends BaseViewModel<VH> implements SelectableViewModel {
+public abstract class BaseSelectableViewModel<V extends BaseViewHolder> extends BaseViewModel<V> implements SelectableViewModel {
 
     private boolean isSelected = false;
 
@@ -21,7 +21,7 @@ public abstract class BaseSelectableViewModel<VH extends BaseViewHolder> extends
 
     @Override
     @CallSuper
-    public void bindView(VH holder) {
+    public void bindView(V holder) {
         super.bindView(holder);
 
         holder.itemView.setActivated(isSelected);
@@ -29,7 +29,7 @@ public abstract class BaseSelectableViewModel<VH extends BaseViewHolder> extends
 
     @Override
     @CallSuper
-    public void bindView(VH holder, int position, List payloads) {
+    public void bindView(V holder, int position, List payloads) {
         super.bindView(holder, position, payloads);
 
         holder.itemView.setActivated(isSelected);

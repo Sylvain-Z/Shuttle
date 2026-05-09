@@ -36,7 +36,7 @@ class PlaylistListFragment :
 
     private var playlistClickListener: PlaylistClickListener? = null
 
-    private val refreshDisposable: Disposable? = null
+    private var refreshDisposable: Disposable? = null
 
     private val disposables = CompositeDisposable()
 

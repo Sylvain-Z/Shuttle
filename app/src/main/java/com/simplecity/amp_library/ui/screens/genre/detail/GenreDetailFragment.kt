@@ -115,7 +115,7 @@ class GenreDetailFragment :
 
     private val emptyView = EmptyView(R.string.empty_songlist)
 
-    private val horizontalRecyclerView = HorizontalRecyclerView("BaseDetail - horizontal")
+    private val horizontalRecyclerView = HorizontalRecyclerView()
 
     private var setHorizontalItemsDisposable: Disposable? = null
 

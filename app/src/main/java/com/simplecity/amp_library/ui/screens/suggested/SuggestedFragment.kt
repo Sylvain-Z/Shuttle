@@ -107,8 +107,8 @@ class SuggestedFragment :
         super.onCreate(savedInstanceState)
 
         adapter = ViewModelAdapter()
-        mostPlayedRecyclerView = HorizontalRecyclerView("SuggestedFragment - mostPlayed")
-        favoriteRecyclerView = HorizontalRecyclerView("SuggestedFragment - favorite")
+        mostPlayedRecyclerView = HorizontalRecyclerView()
+        favoriteRecyclerView = HorizontalRecyclerView()
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {

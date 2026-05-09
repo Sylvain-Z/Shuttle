@@ -402,55 +402,63 @@ public class QueueManager {
                 .map(QueueItemKt::toQueueItems)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe((UnsafeConsumer<List<QueueItem>>) queueItems -> {
-                    String queueList = playbackSettingsManager.getQueueList();
-                    if (queueList != null) {
-                        playlist = deserializePlaylist(queueList, queueItems);
-
-                        final int queuePosition = playbackSettingsManager.getQueuePosition();
-
-                        if (queuePosition < 0 || queuePosition >= playlist.size()) {
-                            // The saved playlist is bogus, discard it
-                            playlist.clear();
+                .subscribe(
+                        (UnsafeConsumer<List<QueueItem>>) queueItems -> processReloadedQueue(queueItems, onComplete),
+                        error -> {
                             queueReloading = false;
                             onComplete.invoke();
-                            return;
-                        }
+                            LogUtils.logException(TAG, "Reloading queue", error);
+                        });
+    }
 
-                        QueueManager.this.queuePosition = queuePosition;
+    private void processReloadedQueue(List<QueueItem> queueItems, Function0<Unit> onComplete) {
+        String queueList = playbackSettingsManager.getQueueList();
+        if (queueList != null) {
+            playlist = deserializePlaylist(queueList, queueItems);
 
-                        if (repeatMode != RepeatMode.ALL && repeatMode != RepeatMode.ONE) {
-                            repeatMode = RepeatMode.OFF;
-                        }
-                        if (shuffleMode != ShuffleMode.ON) {
-                            shuffleMode = ShuffleMode.OFF;
-                        }
-                        if (shuffleMode == ShuffleMode.ON) {
-                            queueList = playbackSettingsManager.getShuffleList();
-                            if (queueList != null) {
-                                shuffleList = deserializePlaylist(queueList, queueItems);
+            final int savedQueuePosition = playbackSettingsManager.getQueuePosition();
 
-                                if (queuePosition >= shuffleList.size()) {
-                                    // The saved playlist is bogus, discard it
-                                    shuffleList.clear();
-                                    queueReloading = false;
-                                    onComplete.invoke();
-                                    return;
-                                }
-                            }
-                        }
+            if (savedQueuePosition < 0 || savedQueuePosition >= playlist.size()) {
+                // The saved playlist is bogus, discard it
+                playlist.clear();
+                queueReloading = false;
+                onComplete.invoke();
+                return;
+            }
 
-                        if (QueueManager.this.queuePosition < 0 || QueueManager.this.queuePosition >= getCurrentPlaylist().size()) {
-                            QueueManager.this.queuePosition = 0;
-                        }
-                    }
-                    queueReloading = false;
-                    onComplete.invoke();
-                }, error -> {
-                    queueReloading = false;
-                    onComplete.invoke();
-                    LogUtils.logException(TAG, "Reloading queue", error);
-                });
+            QueueManager.this.queuePosition = savedQueuePosition;
+
+            if (repeatMode != RepeatMode.ALL && repeatMode != RepeatMode.ONE) {
+                repeatMode = RepeatMode.OFF;
+            }
+            if (shuffleMode != ShuffleMode.ON) {
+                shuffleMode = ShuffleMode.OFF;
+            }
+            if (shuffleMode == ShuffleMode.ON && !loadShuffleList(queueItems, savedQueuePosition, onComplete)) {
+                return;
+            }
+
+            if (QueueManager.this.queuePosition < 0 || QueueManager.this.queuePosition >= getCurrentPlaylist().size()) {
+                QueueManager.this.queuePosition = 0;
+            }
+        }
+        queueReloading = false;
+        onComplete.invoke();
+    }
+
+    private boolean loadShuffleList(List<QueueItem> queueItems, int savedQueuePosition, Function0<Unit> onComplete) {
+        String shuffleQueueList = playbackSettingsManager.getShuffleList();
+        if (shuffleQueueList != null) {
+            shuffleList = deserializePlaylist(shuffleQueueList, queueItems);
+            if (savedQueuePosition >= shuffleList.size()) {
+                // The saved shuffle list is bogus, discard it
+                shuffleList.clear();
+                queueReloading = false;
+                onComplete.invoke();
+                return false;
+            }
+        }
+        return true;
     }
 
     /**
@@ -465,10 +473,8 @@ public class QueueManager {
 
         StringBuilder q = new StringBuilder();
 
-        List<Song> songs = Stream.of(queueItems).map(QueueItem::getSong).toList();
-        int len = songs.size();
-        for (int i = 0; i < len; i++) {
-            long n = songs.get(i).id;
+        for (QueueItem item : queueItems) {
+            long n = item.getSong().id;
             if (n >= 0) {
                 if (n == 0) {
                     q.append("0;");

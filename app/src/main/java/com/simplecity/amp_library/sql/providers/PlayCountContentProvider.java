@@ -85,12 +85,10 @@ public class PlayCountContentProvider extends ContentProvider {
         int uriType = sURIMatcher.match(uri);
         SQLiteDatabase sqlDB = database.getWritableDatabase();
         long id;
-        switch (uriType) {
-            case PLAY_COUNT:
-                id = sqlDB.insert(PlayCountTable.TABLE_PLAY_COUNT, null, values);
-                break;
-            default:
-                throw new IllegalArgumentException("Unknown URI: " + uri);
+        if (uriType == PLAY_COUNT) {
+            id = sqlDB.insert(PlayCountTable.TABLE_PLAY_COUNT, null, values);
+        } else {
+            throw new IllegalArgumentException("Unknown URI: " + uri);
         }
         if (id != -1) {
             getContext().getContentResolver().notifyChange(uri, null);

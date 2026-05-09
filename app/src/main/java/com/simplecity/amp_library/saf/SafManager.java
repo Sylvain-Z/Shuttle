@@ -204,6 +204,14 @@ public class SafManager {
     /**
      * @return a list of potential SD Card paths
      */
+    private String resolveCanonicalPath(String path) {
+        try {
+            return new File(path).getCanonicalPath();
+        } catch (IOException e) {
+            return path;
+        }
+    }
+
     @TargetApi(Build.VERSION_CODES.KITKAT)
     private List<String> getExtSdCardPaths() {
         List<String> paths = new ArrayList<>();
@@ -217,12 +225,7 @@ public class SafManager {
                             Log.w(TAG, "Unexpected external file dir: " + file.getAbsolutePath());
                         } else {
                             String path = file.getAbsolutePath().substring(0, index);
-                            try {
-                                path = new File(path).getCanonicalPath();
-                            } catch (IOException e) {
-                                // Keep non-canonical path.
-                            }
-                            paths.add(path);
+                            paths.add(resolveCanonicalPath(path));
                         }
                     }
                 }
